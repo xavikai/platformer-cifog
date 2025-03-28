@@ -1,8 +1,7 @@
-
-// ThirdPersonController.cs - amb doble salt ajustable
-using UnityEngine;
+﻿using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
 #endif
 
 namespace StarterAssets
@@ -16,6 +15,7 @@ namespace StarterAssets
         [Header("Player Movement")]
         public float MoveSpeed = 2.0f;
         public float SprintSpeed = 5.335f;
+        [SerializeField] private float originalMoveSpeed;
         public float RotationSmoothTime = 0.12f;
         public float SpeedChangeRate = 10.0f;
 
@@ -30,6 +30,13 @@ namespace StarterAssets
         public float doubleJumpMultiplier = 1.0f;
         private bool canDoubleJump = false;
         private bool hasDoubleJumped = false;
+
+        [Header("Crouch Settings")]
+        public bool canCrouch = true;
+        public float crouchHeight = 1f;
+        public float standHeight = 2f;
+        public float crouchSpeed = 1.5f;
+        private bool isCrouching = false;
 
         [Header("Grounded")]
         public bool Grounded = true;
@@ -49,7 +56,7 @@ namespace StarterAssets
         public AudioClip LandingAudioClip;
         [Range(0, 1f)] public float FootstepAudioVolume = 0.5f;
 
-        [Header("Fall Damage Settings")]
+        [Header("Fall Damage")]
         public float fatalFallSpeed = 20f;
         public LayerMask safeLandingLayers;
 
@@ -59,7 +66,6 @@ namespace StarterAssets
         private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
-
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
 
@@ -68,13 +74,13 @@ namespace StarterAssets
         private int _animIDJump;
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
+        private int _animIDCrouch;
 
         private Animator _animator;
         private CharacterController _controller;
         private StarterAssetsInputs _input;
         private GameObject _mainCamera;
         private AudioSource _audioSource;
-
         private PlayerStateManager playerState;
 
 #if ENABLE_INPUT_SYSTEM
@@ -82,13 +88,7 @@ namespace StarterAssets
 #endif
 
         private const float _threshold = 0.01f;
-
-        private bool IsCurrentDeviceMouse =>
-#if ENABLE_INPUT_SYSTEM
-            _playerInput.currentControlScheme == "KeyboardMouse";
-#else
-            false;
-#endif
+        private bool IsCurrentDeviceMouse => _playerInput.currentControlScheme == "KeyboardMouse";
 
         private float _cinemachineTargetYaw;
         private float _cinemachineTargetPitch;
@@ -118,6 +118,8 @@ namespace StarterAssets
             _playerInput = GetComponent<PlayerInput>();
 #endif
             playerState = PlayerStateManager.Instance;
+            originalMoveSpeed = MoveSpeed;
+
             AssignAnimationIDs();
 
             _jumpTimeoutDelta = JumpTimeout;
@@ -131,6 +133,7 @@ namespace StarterAssets
 
             JumpAndGravity();
             GroundedCheck();
+            HandleCrouch();
             Move();
         }
 
@@ -146,6 +149,41 @@ namespace StarterAssets
             _animIDJump = Animator.StringToHash("Jump");
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+            _animIDCrouch = Animator.StringToHash("IsCrouching");
+        }
+
+        private void HandleCrouch()
+        {
+            if (!canCrouch || !Grounded) return;
+
+            Debug.Log($"[CROUCH] Input: {_input.crouch}, isCrouching: {isCrouching}");
+
+            if (_input.crouch && !isCrouching)
+            {
+                originalMoveSpeed = MoveSpeed;
+                _controller.height = crouchHeight;
+                _controller.center = new Vector3(0, crouchHeight * 0.5f, 0);
+                MoveSpeed = crouchSpeed;
+                isCrouching = true;
+                if (_animator != null) _animator.SetBool("IsCrouching", true);
+
+                Debug.Log("🔽 Entrant a crouch.");
+            }
+            else if (!_input.crouch && isCrouching && !CheckCeiling())
+            {
+                _controller.height = standHeight;
+                _controller.center = new Vector3(0, standHeight * 0.5f, 0);
+                MoveSpeed = originalMoveSpeed;
+                isCrouching = false;
+                if (_animator != null) _animator.SetBool("IsCrouching", false);
+
+                Debug.Log("🔼 Sortint de crouch.");
+            }
+        }
+
+        private bool CheckCeiling()
+        {
+            return Physics.Raycast(transform.position, Vector3.up, standHeight - crouchHeight + 0.1f);
         }
 
         private void GroundedCheck()
@@ -163,11 +201,8 @@ namespace StarterAssets
                 float fallSpeed = Mathf.Abs(_verticalVelocity);
                 bool landedOnSafeSurface = Physics.CheckSphere(spherePosition, GroundedRadius, safeLandingLayers);
 
-                if (fallSpeed > fatalFallSpeed)
-                {
-                    if (!landedOnSafeSurface)
-                        playerState.TakeDamage(playerState.currentHealth);
-                }
+                if (fallSpeed > fatalFallSpeed && !landedOnSafeSurface)
+                    playerState.TakeDamage(playerState.currentHealth);
             }
 
             if (_animator != null)
@@ -178,7 +213,7 @@ namespace StarterAssets
         {
             if (playerState == null || !playerState.CanMove) return;
 
-            float targetSpeed = _input.sprint && playerState.TryUseStamina(playerState.staminaDrainRate * Time.deltaTime)
+            float targetSpeed = (_input.sprint && !isCrouching && playerState.TryUseStamina(playerState.staminaDrainRate * Time.deltaTime))
                 ? SprintSpeed
                 : MoveSpeed;
 
@@ -229,7 +264,7 @@ namespace StarterAssets
                 if (_verticalVelocity < 0.0f)
                     _verticalVelocity = -2f;
 
-                if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+                if (_input.jump && _jumpTimeoutDelta <= 0.0f && !isCrouching)
                 {
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
                     hasDoubleJumped = false;
@@ -294,13 +329,6 @@ namespace StarterAssets
             return Mathf.Clamp(angle, min, max);
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            Color color = Grounded ? new Color(0f, 1f, 0f, 0.35f) : new Color(1f, 0f, 0f, 0.35f);
-            Gizmos.color = color;
-            Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
-        }
-
         private void OnFootstep(AnimationEvent animationEvent)
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f && FootstepAudioClips.Length > 0)
@@ -316,6 +344,16 @@ namespace StarterAssets
             {
                 _audioSource.PlayOneShot(LandingAudioClip, FootstepAudioVolume);
             }
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Color color = Grounded ? new Color(0f, 1f, 0f, 0.35f) : new Color(1f, 0f, 0f, 0.35f);
+            Gizmos.color = color;
+            Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
+
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawRay(transform.position, Vector3.up * (standHeight - crouchHeight + 0.1f));
         }
     }
 }
