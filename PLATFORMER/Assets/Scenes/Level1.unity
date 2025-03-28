@@ -4792,6 +4792,10 @@ PrefabInstance:
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6981647642190442084, guid: 52d80ac47b68a22449caadbb48f11898, type: 3}
+      propertyPath: enableDoubleJump
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6981647642190442084, guid: 52d80ac47b68a22449caadbb48f11898, type: 3}
       propertyPath: playerUIController
       value: 
       objectReference: {fileID: 0}
