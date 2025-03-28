@@ -4803,6 +4803,10 @@ PrefabInstance:
       propertyPath: GroundLayers.m_Bits
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6981647642190442084, guid: 52d80ac47b68a22449caadbb48f11898, type: 3}
+      propertyPath: doubleJumpMultiplier
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6981647642190442085, guid: 52d80ac47b68a22449caadbb48f11898, type: 3}
       propertyPath: m_SkinWidth
       value: 0.05
