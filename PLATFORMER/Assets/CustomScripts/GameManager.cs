@@ -160,6 +160,7 @@ public class GameManager : MonoBehaviour
         if (!string.IsNullOrEmpty(lastLevelSceneName))
         {
             Debug.Log($"🔄 Reiniciant últim nivell jugat: {lastLevelSceneName}");
+            ResetPlayerStats();
             StartCoroutine(LoadSceneWithFade(lastLevelSceneName));
         }
         else
