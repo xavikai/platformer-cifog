@@ -1276,6 +1276,10 @@ PrefabInstance:
       value: CheatManager
       objectReference: {fileID: 0}
     - target: {fileID: 951482684579486354, guid: be7274369382bee498179e8fe7b7158c, type: 3}
+      propertyPath: debugModeOnly
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 951482684579486354, guid: be7274369382bee498179e8fe7b7158c, type: 3}
       propertyPath: floatingTextPrefab
       value: 
       objectReference: {fileID: 3165241257388963001, guid: 3f1e6d7c67158a346aabbe9ea8127ed6, type: 3}
