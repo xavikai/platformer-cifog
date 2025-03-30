@@ -76,6 +76,8 @@ namespace StarterAssets
         private int _animIDMotionSpeed;
         private int _animIDCrouch;
 
+        private bool wasCrouching = false;
+
         private Animator _animator;
         private CharacterController _controller;
         private StarterAssetsInputs _input;
@@ -130,7 +132,7 @@ namespace StarterAssets
         {
             if (playerState == null)
                 playerState = PlayerStateManager.Instance;
-
+            Debug.Log($"[DEBUG] _input.crouch: {_input.crouch}");
             JumpAndGravity();
             GroundedCheck();
             HandleCrouch();
@@ -154,32 +156,30 @@ namespace StarterAssets
 
         private void HandleCrouch()
         {
-            if (!canCrouch || !Grounded) return;
-
-            Debug.Log($"[CROUCH] Input: {_input.crouch}, isCrouching: {isCrouching}");
-
             if (_input.crouch && !isCrouching)
             {
-                originalMoveSpeed = MoveSpeed;
                 _controller.height = crouchHeight;
                 _controller.center = new Vector3(0, crouchHeight * 0.5f, 0);
                 MoveSpeed = crouchSpeed;
                 isCrouching = true;
-                if (_animator != null) _animator.SetBool("IsCrouching", true);
+                wasCrouching = true;
 
-                Debug.Log("🔽 Entrant a crouch.");
+                if (_animator != null) _animator.SetBool("IsCrouching", true);
+                Debug.Log($"[CROUCH] Activat");
             }
-            else if (!_input.crouch && isCrouching && !CheckCeiling())
+            else if (!_input.crouch && isCrouching && wasCrouching)
             {
                 _controller.height = standHeight;
                 _controller.center = new Vector3(0, standHeight * 0.5f, 0);
                 MoveSpeed = originalMoveSpeed;
                 isCrouching = false;
-                if (_animator != null) _animator.SetBool("IsCrouching", false);
+                wasCrouching = false;
 
-                Debug.Log("🔼 Sortint de crouch.");
+                if (_animator != null) _animator.SetBool("IsCrouching", false);
+                Debug.Log($"[CROUCH] Desactivat");
             }
         }
+
 
         private bool CheckCeiling()
         {
@@ -240,7 +240,9 @@ namespace StarterAssets
                 transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
             }
 
-            Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+            // Si estem ajupits, evitem el desplaçament
+            Vector3 targetDirection = isCrouching ? Vector3.zero : Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) + Vector3.up * _verticalVelocity * Time.deltaTime);
 
             if (_animator != null)

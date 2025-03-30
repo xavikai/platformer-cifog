@@ -1131,6 +1131,8 @@ MonoBehaviour:
   Gravity: -15
   JumpTimeout: 0.3
   FallTimeout: 0.15
+  enableDoubleJump: 1
+  doubleJumpMultiplier: 1
   canCrouch: 1
   crouchHeight: 1
   standHeight: 2
@@ -1146,6 +1148,13 @@ MonoBehaviour:
   BottomClamp: -30
   CameraAngleOverride: 0
   LockCameraPosition: 0
+  FootstepAudioClips: []
+  LandingAudioClip: {fileID: 0}
+  FootstepAudioVolume: 0.5
+  fatalFallSpeed: 20
+  safeLandingLayers:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &5885216827943657505
 MonoBehaviour:
   m_ObjectHideFlags: 0

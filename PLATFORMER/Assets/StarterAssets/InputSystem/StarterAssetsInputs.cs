@@ -50,6 +50,7 @@ namespace StarterAssets
             crouch = value.isPressed;
             Debug.Log($"[INPUT SYSTEM] Crouch input rebut: {crouch}");
         }
+
 #endif
 
         public void MoveInput(Vector2 newMoveDirection)
