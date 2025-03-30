@@ -213,7 +213,8 @@ namespace StarterAssets
         {
             if (playerState == null || !playerState.CanMove) return;
 
-            float targetSpeed = (_input.sprint && !isCrouching && playerState.TryUseStamina(playerState.staminaDrainRate * Time.deltaTime))
+            bool isTryingToSprint = _input.sprint && !isCrouching && _input.move != Vector2.zero;
+            float targetSpeed = (isTryingToSprint && playerState.TryUseStamina(playerState.staminaDrainRate * Time.deltaTime))
                 ? SprintSpeed
                 : MoveSpeed;
 
@@ -248,6 +249,7 @@ namespace StarterAssets
                 _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
             }
         }
+
 
         private void JumpAndGravity()
         {

@@ -12,14 +12,13 @@ public class PlayerStateManager : MonoBehaviour
 
     public int currentCoins;
 
-    public float staminaDrainRate = 10f; // Per l'sprint
+    public float staminaDrainRate = 10f;
     public float staminaRegenRate = 5f;
 
     public bool isFrozen = false;
 
     public bool CanMove => currentHealth > 0 && !isFrozen;
 
-    // 🔸 Estats de partida al començament del nivell
     private float levelStartHealth;
     private float levelStartStamina;
     private int levelStartCoins;
@@ -39,22 +38,26 @@ public class PlayerStateManager : MonoBehaviour
         currentStamina = maxStamina;
         currentCoins = 0;
 
-        // Guardem els valors inicials
         SaveLevelStartState();
     }
 
     private void Update()
     {
-        RegenerateStamina();
+        if (!Input.GetKey(KeyCode.LeftShift) || !IsMoving())
+        {
+            RegenerateStamina();
+        }
+    }
+
+    private bool IsMoving()
+    {
+        return Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f || Mathf.Abs(Input.GetAxis("Vertical")) > 0.1f;
     }
 
     private void RegenerateStamina()
     {
-        if (!Input.GetKey(KeyCode.LeftShift))
-        {
-            currentStamina += staminaRegenRate * Time.deltaTime;
-            currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
-        }
+        currentStamina += staminaRegenRate * Time.deltaTime;
+        currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
     }
 
     public void TakeDamage(float damage)
@@ -71,7 +74,7 @@ public class PlayerStateManager : MonoBehaviour
 
     public bool TryUseStamina(float amount)
     {
-        if (currentStamina >= amount)
+        if (currentStamina >= amount && IsMoving())
         {
             currentStamina -= amount;
             return true;
@@ -91,7 +94,6 @@ public class PlayerStateManager : MonoBehaviour
         currentCoins = coins;
     }
 
-    // 🔸 Guardar estat inicial del nivell
     public void SaveLevelStartState()
     {
         levelStartHealth = currentHealth;
@@ -101,7 +103,6 @@ public class PlayerStateManager : MonoBehaviour
         Debug.Log($"📝 Estat inicial guardat ➜ Vida: {levelStartHealth}, Estamina: {levelStartStamina}, Monedes: {levelStartCoins}");
     }
 
-    // 🔸 Restaurar estat inicial del nivell
     public void RestoreLevelStartState()
     {
         SetPlayerState(levelStartHealth, levelStartStamina, levelStartCoins);
