@@ -191,7 +191,9 @@ namespace StarterAssets
             Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
             bool wasGrounded = Grounded;
 
-            Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
+            // Comprovem si toquem terra o qualsevol objecte amb collider (com caixes empènyibles)
+            Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore)
+                || (Physics.Raycast(transform.position + Vector3.up * 0.2f, Vector3.down, out RaycastHit hitInfo, 1.0f) && hitInfo.collider != null);
 
             if (!wasGrounded && Grounded)
             {
