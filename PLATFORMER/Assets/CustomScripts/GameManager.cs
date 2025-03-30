@@ -51,7 +51,6 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        // Opcionalment pots iniciar un fade in automàtic
         if (FadeManager.Instance != null)
         {
             FadeManager.Instance.FadeIn(1f);
@@ -64,16 +63,20 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"🌍 Escena carregada: {scene.name}");
 
-        // Guarda l'últim nivell jugat (no MainMenu/GameOver/YouWin)
-        if (scene.name != "MainMenu" && scene.name != "GameOver" && scene.name != "YouWin")
+        bool isGameplayLevel = scene.name != "MainMenu" && scene.name != "GameOver" && scene.name != "YouWin";
+
+        if (isGameplayLevel)
         {
             lastLevelSceneName = scene.name;
             Debug.Log($"✅ Guardat últim nivell jugat: {lastLevelSceneName}");
 
-            if (PlayerStateManager.Instance != null)
+            if (PlayerStateManager.Instance == null)
             {
-                PlayerStateManager.Instance.SaveLevelStartState();
+                Debug.Log("🧱 Instanciant PlayerStateManager...");
+                Instantiate(playerStateManagerPrefab);
             }
+
+            PlayerStateManager.Instance.SaveLevelStartState();
         }
 
         if (scene.name == firstLevelSceneName)
@@ -160,7 +163,9 @@ public class GameManager : MonoBehaviour
         if (!string.IsNullOrEmpty(lastLevelSceneName))
         {
             Debug.Log($"🔄 Reiniciant últim nivell jugat: {lastLevelSceneName}");
-            ResetPlayerStats();
+
+            PlayerStateManager.Instance?.RestoreLevelStartState();
+
             StartCoroutine(LoadSceneWithFade(lastLevelSceneName));
         }
         else
@@ -225,7 +230,7 @@ public class GameManager : MonoBehaviour
         if (FadeManager.Instance != null)
         {
             FadeManager.Instance.FadeOut(1f);
-            yield return new WaitForSeconds(1f); // Match fadeOut duration
+            yield return new WaitForSeconds(1f);
         }
 
         Debug.Log($"🌐 Carregant nova escena: {sceneName}");
@@ -235,7 +240,7 @@ public class GameManager : MonoBehaviour
         if (FadeManager.Instance != null)
         {
             FadeManager.Instance.FadeIn(1f);
-            yield return new WaitForSeconds(1f); // Match fadeIn duration
+            yield return new WaitForSeconds(1f);
         }
 
         isTransitioning = false;
