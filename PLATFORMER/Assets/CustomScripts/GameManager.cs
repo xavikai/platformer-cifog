@@ -191,6 +191,11 @@ public class GameManager : MonoBehaviour
     public void GoToGameOver()
     {
         Debug.Log("💀 Anant a l'escena GameOver");
+
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         StartCoroutine(LoadSceneWithFade("GameOver"));
     }
 
