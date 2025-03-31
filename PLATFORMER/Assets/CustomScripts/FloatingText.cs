@@ -22,17 +22,20 @@ public class FloatingText : MonoBehaviour
             if (textFeedback == null)
             {
                 Debug.LogError("❗ No s'ha pogut trobar cap TMP_Text dins de FloatingText!");
-                Debug.Break();
+                enabled = false; // ✳️ Desactivem aquest script per evitar més errors
+                return;
             }
         }
+
+        originalColor = textFeedback.color;
     }
 
     private void Update()
     {
-        // Mou el text cap amunt
-        transform.position += floatDirection * floatSpeed * Time.deltaTime;
+        // Mou el text cap amunt (usant Time.unscaledDeltaTime per funcionar en pausa)
+        transform.position += floatDirection * floatSpeed * Time.unscaledDeltaTime;
 
-        elapsedTime += Time.deltaTime;
+        elapsedTime += Time.unscaledDeltaTime;
         float fadeAmount = Mathf.Clamp01(1f - (elapsedTime / fadeDuration));
 
         if (textFeedback != null)
@@ -56,14 +59,17 @@ public class FloatingText : MonoBehaviour
         {
             textFeedback.text = newText;
 
-            // Forcem el Face Color del Material a blanc (només per seguretat)
-            textFeedback.fontMaterial.SetColor(ShaderUtilities.ID_FaceColor, Color.white);
+            // ✅ Assegurem que el color s’aplica realment
+            textFeedback.color = newVertexColor;
 
-            // Assignem el vertex color
+            // Si vols forçar el material per seguretat:
+            if (textFeedback.fontMaterial.HasProperty(ShaderUtilities.ID_FaceColor))
+            {
+                textFeedback.fontMaterial.SetColor(ShaderUtilities.ID_FaceColor, newVertexColor);
+            }
+
             originalColor = newVertexColor;
-            textFeedback.color = originalColor;
-
-            Debug.Log($"✅ SetupText ➜ Text: {newText}, Color: {originalColor}");
         }
     }
+
 }
