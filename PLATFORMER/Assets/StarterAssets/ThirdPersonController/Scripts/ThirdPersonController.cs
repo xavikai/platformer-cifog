@@ -21,9 +21,9 @@ namespace StarterAssets
 
         [Header("Jump & Gravity")]
         public float JumpHeight = 1.2f;
-        public float Gravity = -15.0f;
+        public float Gravity = -40.0f;
         public float JumpTimeout = 0.50f;
-        public float FallTimeout = 0.15f;
+        public float FallTimeout = 0.05f;
 
         [Header("Double Jump")]
         public bool enableDoubleJump = false;
@@ -268,7 +268,7 @@ namespace StarterAssets
                 }
 
                 if (_verticalVelocity < 0.0f)
-                    _verticalVelocity = -2f;
+                    _verticalVelocity = -10f;
 
                 if (_input.jump && _jumpTimeoutDelta <= 0.0f && !isCrouching)
                 {
