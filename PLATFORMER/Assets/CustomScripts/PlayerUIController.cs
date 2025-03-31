@@ -50,6 +50,6 @@ public class PlayerUIController : MonoBehaviour
     {
         healthSlider.value = playerState.currentHealth;
         staminaSlider.value = playerState.currentStamina;
-        coinText.text = "Monedes: " + playerState.currentCoins;
+        coinText.text = ": " + playerState.currentCoins;
     }
 }
