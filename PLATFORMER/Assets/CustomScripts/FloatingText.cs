@@ -16,10 +16,14 @@ public class FloatingText : MonoBehaviour
 
     private void Awake()
     {
-        // Assegura't que tenim referència
         if (textFeedback == null)
         {
-            Debug.LogError("❗ Assegura't d'assignar el TMP_Text 'TextFeedback' al FloatingText!");
+            textFeedback = GetComponentInChildren<TMP_Text>();
+            if (textFeedback == null)
+            {
+                Debug.LogError("❗ No s'ha pogut trobar cap TMP_Text dins de FloatingText!");
+                Debug.Break();
+            }
         }
     }
 

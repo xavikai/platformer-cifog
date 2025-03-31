@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cheatsEnabled: 1
-  debugModeOnly: 1
-  floatingTextPrefab: {fileID: 0}
+  debugModeOnly: 0
+  floatingTextPrefab: {fileID: 3165241257388963001, guid: 3f1e6d7c67158a346aabbe9ea8127ed6, type: 3}
   floatingTextSpawnPoint: {fileID: 0}
   cheatTextColor: {r: 0, g: 1, b: 1, a: 1}
   floatingTextFontSize: 2

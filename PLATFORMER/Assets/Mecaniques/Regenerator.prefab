@@ -192,8 +192,6 @@ MonoBehaviour:
   canRespawn: 1
   respawnDelay: 5
   pickupEffect: {fileID: 3137202160601122924, guid: 614da1b86f806b640a26b2c06dc2b912, type: 3}
-  pickupSound: {fileID: 0}
-  soundVolume: 1
   floatingTextPrefab: {fileID: 3165241257388963001, guid: 3f1e6d7c67158a346aabbe9ea8127ed6, type: 3}
   floatingTextSpawnPoint: {fileID: 6022880265221785079}
-  floatingTextColor: {r: 0, g: 1, b: 0, a: 1}
+  floatingTextColor: {r: 0, g: 0, b: 1, a: 1}
